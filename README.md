@@ -1,58 +1,92 @@
 ---
 
-# Paragliding Smart Contract
+# School Grading System Smart Contract
 
-This Solidity smart contract is designed to manage the registration and eligibility verification of individuals for paragliding based on their weight. The contract enforces a strict condition that only individuals weighing less than 80 kg are eligible to participate.
+This smart contract represents a simple school grading system implemented in Solidity. It allows you to register a student's score, validate that the score is within acceptable boundaries, and check if the student passed or failed based on their score.
+
+## Prerequisites
+
+- Solidity 0.8.18 or higher
+- A Solidity-compatible development environment (e.g., Remix, Hardhat)
 
 ## Contract Overview
 
-- **Contract Name:** `Paragliding`
-- **Compiler Version:** `0.8.18`
-- **License:** MIT
+The `SchoolGradingSystem` contract consists of the following features:
+- **Score registration**: Allows users to register a student's score out of 100.
+- **Passing grade check**: Validates if the score qualifies as a passing grade (≥ 40).
+- **Score validation**: Ensures that the score is between 0 and 100.
+- **Failure check**: Identifies if the student has failed by checking if the score is less than 40.
 
-### State Variables
+## Functions
 
-- `uint public viewerWeight`: Stores the weight of the individual registering for paragliding.
+### `registerScore(uint _score)`
+This function registers a student's score and ensures that it is between 0 and 100 using the `require` statement. If the score is invalid, it throws an error.
 
-### Functions
+- **Parameters**:
+  - `_score`: The student's score (must be between 0 and 100).
+- **Error Handling**:
+  - Uses `require` to ensure that the score is within the valid range.
+  
+### `checkPassingGrade()`
+This function checks if the student's score is 40 or more, indicating a passing grade. It uses the `assert` statement to ensure this condition.
 
-1. **`register(uint _weight) public`:**
-   - Registers the weight of the individual.
-   - Input: `_weight` (weight in kilograms).
+- **Error Handling**:
+  - Uses `assert` to validate that the score is greater than or equal to 40.
 
-2. **`checkAssert() public view`:**
-   - Checks that the weight of the individual is below 80 kg using the `assert` statement.
-   - If the condition fails (i.e., weight is 80 kg or more), the transaction will revert, consuming all gas.
+### `validateScore()`
+This function checks if the registered score is between 0 and 100 using the `require` statement. If the score is invalid, it throws an error.
 
-3. **`checkRequire() public view`:**
-   - Enforces that the weight is below 80 kg using the `require` statement.
-   - If the condition fails, the transaction will revert, providing the message "You must weigh less than 80 kg to do paragliding."
+- **Error Handling**:
+  - Uses `require` to enforce valid score boundaries (0 to 100).
 
-4. **`checkRevert() public view`:**
-   - Uses the `revert` statement to enforce that the weight is below 80 kg.
-   - If the weight is 80 kg or more, the transaction will revert with the message "You must weigh less than 80 kg to do paragliding."
+### `checkFailure()`
+This function checks if the student's score is less than 40, indicating failure. If the student has failed, the function reverts the transaction using `revert`.
 
-## How to Use
+- **Error Handling**:
+  - Uses `revert` to handle failure cases (score < 40).
 
-1. **Registering a Weight:**
-   - Call the `register(uint _weight)` function with the individual’s weight in kilograms.
+## Usage
 
-2. **Checking Eligibility:**
-   - Call `checkAssert()` to ensure the weight is below 80 kg. This will use `assert`, which is typically used for internal error detection.
-   - Call `checkRequire()` to enforce the weight condition, ensuring that the weight is below 80 kg. This will provide an error message if the condition is not met.
-   - Call `checkRevert()` to enforce the weight condition similarly to `checkRequire()`, but using a `revert` statement.
+1. **Register a score**:
+   Call the `registerScore(uint _score)` function and pass the student's score as an argument (0 to 100).
+
+2. **Check passing grade**:
+   After registering a score, call the `checkPassingGrade()` function to ensure that the student has passed (score ≥ 40). If the score is below 40, the function will throw an assertion error.
+
+3. **Validate score range**:
+   Call `validateScore()` to verify that the registered score is between 0 and 100.
+
+4. **Check failure**:
+   Call `checkFailure()` to check if the student has failed (score < 40). If the student has failed, the function will revert the transaction with an error message.
+
+## Example
+
+```solidity
+SchoolGradingSystem gradingSystem = new SchoolGradingSystem();
+
+// Register a score
+gradingSystem.registerScore(85);
+
+// Check if the student passed
+gradingSystem.checkPassingGrade(); // Passes, as the score is >= 40
+
+// Validate score range
+gradingSystem.validateScore(); // Passes, as the score is within 0-100
+
+// Check if the student failed
+gradingSystem.checkFailure(); // No error, as the score is >= 40
+```
+
+## Error Handling
+
+- **`assert`**: Used to ensure that certain conditions (like passing grades) are always met. If the condition fails, it will throw an exception.
+- **`require`**: Used to validate input or conditions before performing any logic (e.g., valid score range). If the condition fails, the function call is reverted.
+- **`revert`**: Used in failure cases to manually revert a transaction when a specific condition is not met (e.g., student failing).
+
+---
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-
-
-### Notes
-
-- The `assert` statement is used to check for conditions that should never occur in the contract's logic. If `assert` fails, it indicates a serious error.
-- The `require` and `revert` statements are used to enforce conditions and provide informative error messages if those conditions are not met.
 
 ---
