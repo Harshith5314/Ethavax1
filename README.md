@@ -1,92 +1,99 @@
----
+# Voting System Smart Contract
 
-# School Grading System Smart Contract
+## Overview
 
-This smart contract represents a simple school grading system implemented in Solidity. It allows you to register a student's score, validate that the score is within acceptable boundaries, and check if the student passed or failed based on their score.
+This is a simple **Voting System** smart contract written in Solidity. It allows candidates to register, and voters to cast their votes. The contract ensures that:
 
-## Prerequisites
+- Only registered candidates can receive votes.
+- Voters can only vote once.
+- Voting must be open to accept votes.
 
-- Solidity 0.8.18 or higher
-- A Solidity-compatible development environment (e.g., Remix, Hardhat)
+## Features
+1. **Candidate Registration**: Candidates can register themselves before the voting starts.
+2. **Voting**: Users can cast their vote for a registered candidate while the voting is open.
+3. **View Votes**: Check the number of votes a candidate has received.
+4. **Close Voting**: Close the voting process to stop accepting new votes.
+5. **Finalize Results**: Calculate and verify internal vote counts.
 
-## Contract Overview
+## Error Handling Mechanisms
 
-The `SchoolGradingSystem` contract consists of the following features:
-- **Score registration**: Allows users to register a student's score out of 100.
-- **Passing grade check**: Validates if the score qualifies as a passing grade (≥ 40).
-- **Score validation**: Ensures that the score is between 0 and 100.
-- **Failure check**: Identifies if the student has failed by checking if the score is less than 40.
+This contract utilizes three main error handling methods in Solidity: **`require`**, **`revert`**, and **`assert`**.
 
-## Functions
+### Usage of `require`
+- `require` is used to validate input conditions and preconditions before executing the function logic.
+- **Example**:
+    ```solidity
+    require(votingOpen, "Voting is currently closed.");
+    ```
+    This ensures that voting is open before allowing a vote to be cast.
 
-### `registerScore(uint _score)`
-This function registers a student's score and ensures that it is between 0 and 100 using the `require` statement. If the score is invalid, it throws an error.
+### Usage of `revert`
+- `revert` is used to undo the entire transaction if specific conditions are not met.
+- **Example**:
+    ```solidity
+    if (votingOpen) {
+        revert("Voting must be closed before resetting.");
+    }
+    ```
+    This reverts the transaction if someone tries to reset the voting while it is still open, undoing all state changes.
 
-- **Parameters**:
-  - `_score`: The student's score (must be between 0 and 100).
-- **Error Handling**:
-  - Uses `require` to ensure that the score is within the valid range.
+### Usage of `assert`
+- `assert` is used to check for conditions that should never fail. It indicates a critical bug if it fails.
+- **Example**:
+    ```solidity
+    assert(totalVotes >= candidateList.length);
+    ```
+    This `assert` ensures that the total votes counted should be at least equal to the number of registered candidates. If this condition fails, it suggests a bug in the contract.
+
+## Contract Functions
+
+1. **registerCandidate(string memory _name)**:
+    - Allows a candidate to register with their name.
+    - Uses `require` to ensure the candidate is not already registered.
   
-### `checkPassingGrade()`
-This function checks if the student's score is 40 or more, indicating a passing grade. It uses the `assert` statement to ensure this condition.
+2. **vote(string memory _candidateName)**:
+    - Allows users to cast a vote for a registered candidate.
+    - Uses `require` to check:
+        - The voter has not voted before.
+        - The candidate is registered.
+    - Emits a `VoteCasted` event upon successful voting.
 
-- **Error Handling**:
-  - Uses `assert` to validate that the score is greater than or equal to 40.
+3. **getVotes(string memory _candidateName)**:
+    - Returns the number of votes a candidate has received.
+    - Uses `require` to ensure the candidate is registered.
 
-### `validateScore()`
-This function checks if the registered score is between 0 and 100 using the `require` statement. If the score is invalid, it throws an error.
+4. **closeVoting()**:
+    - Closes the voting process to stop accepting new votes.
 
-- **Error Handling**:
-  - Uses `require` to enforce valid score boundaries (0 to 100).
+5. **finalizeResults()**:
+    - Calculates the total votes and uses `assert` to ensure vote counting integrity.
 
-### `checkFailure()`
-This function checks if the student's score is less than 40, indicating failure. If the student has failed, the function reverts the transaction using `revert`.
+6. **resetVoting()**:
+    - Resets the vote counts and reopens voting.
+    - Uses `revert` to invalidate the transaction if voting is not yet closed.
 
-- **Error Handling**:
-  - Uses `revert` to handle failure cases (score < 40).
+## Getting Started
 
-## Usage
+### Prerequisites
+- Solidity ^0.8.0
+- Remix IDE or Truffle for contract deployment
 
-1. **Register a score**:
-   Call the `registerScore(uint _score)` function and pass the student's score as an argument (0 to 100).
+### Deployment
+1. Copy the Solidity code into your IDE (e.g., Remix IDE).
+2. Compile the contract using Solidity ^0.8.0.
+3. Deploy the contract on the desired Ethereum testnet.
 
-2. **Check passing grade**:
-   After registering a score, call the `checkPassingGrade()` function to ensure that the student has passed (score ≥ 40). If the score is below 40, the function will throw an assertion error.
-
-3. **Validate score range**:
-   Call `validateScore()` to verify that the registered score is between 0 and 100.
-
-4. **Check failure**:
-   Call `checkFailure()` to check if the student has failed (score < 40). If the student has failed, the function will revert the transaction with an error message.
-
-## Example
-
-```solidity
-SchoolGradingSystem gradingSystem = new SchoolGradingSystem();
-
-// Register a score
-gradingSystem.registerScore(85);
-
-// Check if the student passed
-gradingSystem.checkPassingGrade(); // Passes, as the score is >= 40
-
-// Validate score range
-gradingSystem.validateScore(); // Passes, as the score is within 0-100
-
-// Check if the student failed
-gradingSystem.checkFailure(); // No error, as the score is >= 40
-```
-
-## Error Handling
-
-- **`assert`**: Used to ensure that certain conditions (like passing grades) are always met. If the condition fails, it will throw an exception.
-- **`require`**: Used to validate input or conditions before performing any logic (e.g., valid score range). If the condition fails, the function call is reverted.
-- **`revert`**: Used in failure cases to manually revert a transaction when a specific condition is not met (e.g., student failing).
-
----
+### Interacting with the Contract
+1. **Register Candidate**: Call `registerCandidate(string _name)` to register a new candidate.
+2. **Vote**: Call `vote(string _candidateName)` to cast a vote for a registered candidate.
+3. **View Votes**: Use `getVotes(string _candidateName)` to view the vote count of a candidate.
+4. **Close Voting**: Call `closeVoting()` to close the voting process.
+5. **Finalize Results**: Use `finalizeResults()` to verify the vote counts.
+6. **Reset Voting**: Call `resetVoting()` to reset the voting system.
 
 ## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ---
+##Author
+Kaduluri Hasrhith (kaduluriharshith@gmail.com)
