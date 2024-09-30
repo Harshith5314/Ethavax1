@@ -95,5 +95,5 @@ This contract utilizes three main error handling methods in Solidity: **`require
 This project is licensed under the MIT License.
 
 ---
-##Author
+## Author
 Kaduluri Hasrhith (kaduluriharshith@gmail.com)
