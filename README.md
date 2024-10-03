@@ -1,99 +1,110 @@
-# Voting System Smart Contract
+# Solidity Code Submission & Review Contract
 
-## Overview
+This Solidity smart contract simulates a code submission and review system, similar to the process used on the Metacrafters platform. Users can submit their code for review, and the owner of the contract (e.g., the reviewer) can approve or reject it based on predefined requirements. The contract utilizes error-handling mechanisms like `require`, `revert`, and `assert` to ensure a robust workflow.
 
-This is a simple **Voting System** smart contract written in Solidity. It allows candidates to register, and voters to cast their votes. The contract ensures that:
-
-- Only registered candidates can receive votes.
-- Voters can only vote once.
-- Voting must be open to accept votes.
+## Table of Contents
+- [Features](#features)
+- [Smart Contract Overview](#smart-contract-overview)
+- [Prerequisites](#prerequisites)
+- [Deployment](#deployment)
+- [Usage Instructions](#usage-instructions)
+- [Error Handling](#error-handling)
+- [Example Workflow](#example-workflow)
+- [License](#license)
 
 ## Features
-1. **Candidate Registration**: Candidates can register themselves before the voting starts.
-2. **Voting**: Users can cast their vote for a registered candidate while the voting is open.
-3. **View Votes**: Check the number of votes a candidate has received.
-4. **Close Voting**: Close the voting process to stop accepting new votes.
-5. **Finalize Results**: Calculate and verify internal vote counts.
 
-## Error Handling Mechanisms
+- **Code Submission**: Users can submit their code for review, ensuring that each submission is unique.
+- **Review Process**: The contract owner can review and either approve or reject the submitted code based on whether it meets the requirements.
+- **Approval Status**: Allows users to check whether their code submission has been approved.
+- **Error Handling**: Includes usage of `require`, `revert`, and `assert` to handle common errors and maintain the integrity of the contract.
 
-This contract utilizes three main error handling methods in Solidity: **`require`**, **`revert`**, and **`assert`**.
+## Smart Contract Overview
 
-### Usage of `require`
-- `require` is used to validate input conditions and preconditions before executing the function logic.
-- **Example**:
-    ```solidity
-    require(votingOpen, "Voting is currently closed.");
-    ```
-    This ensures that voting is open before allowing a vote to be cast.
+### Functions:
+1. **`submitCode(string memory _code)`**
+   - Allows users to submit code for review.
+   - Checks if the submitted code is unique using the `require` statement.
+   - Resets approval status to `false` upon new submission.
 
-### Usage of `revert`
-- `revert` is used to undo the entire transaction if specific conditions are not met.
-- **Example**:
-    ```solidity
-    if (votingOpen) {
-        revert("Voting must be closed before resetting.");
-    }
-    ```
-    This reverts the transaction if someone tries to reset the voting while it is still open, undoing all state changes.
+2. **`reviewCode(bool _meetsRequirements)`**
+   - Can only be called by the contract owner.
+   - Approves or rejects the code based on whether it meets the requirements.
+   - Uses `revert` to stop execution if the code does not meet the standards.
 
-### Usage of `assert`
-- `assert` is used to check for conditions that should never fail. It indicates a critical bug if it fails.
-- **Example**:
-    ```solidity
-    assert(totalVotes >= candidateList.length);
-    ```
-    This `assert` ensures that the total votes counted should be at least equal to the number of registered candidates. If this condition fails, it suggests a bug in the contract.
+3. **`checkApproval()`**
+   - Allows any user to check whether the last submitted code has been approved.
+   - Uses `assert` to verify that a code has been submitted before checking approval status.
 
-## Contract Functions
+### Modifiers:
+- **`onlyOwner`**: Restricts access to functions so that only the owner can call them (e.g., `reviewCode`).
 
-1. **registerCandidate(string memory _name)**:
-    - Allows a candidate to register with their name.
-    - Uses `require` to ensure the candidate is not already registered.
-  
-2. **vote(string memory _candidateName)**:
-    - Allows users to cast a vote for a registered candidate.
-    - Uses `require` to check:
-        - The voter has not voted before.
-        - The candidate is registered.
-    - Emits a `VoteCasted` event upon successful voting.
+### Error Handling:
+- **`require`**: Ensures that the code being submitted is unique and only the owner can review.
+- **`revert`**: Used in `reviewCode` to handle scenarios where the code doesn’t meet the required standards.
+- **`assert`**: Verifies that code has been submitted before checking the approval status.
 
-3. **getVotes(string memory _candidateName)**:
-    - Returns the number of votes a candidate has received.
-    - Uses `require` to ensure the candidate is registered.
+## Prerequisites
 
-4. **closeVoting()**:
-    - Closes the voting process to stop accepting new votes.
+- **Solidity Compiler**: Ensure you have a compatible version (preferably `^0.8.0`).
+- **Ethereum Development Environment**: Remix IDE, Hardhat, or Truffle for compiling and deploying the contract.
+- **MetaMask** or any other Ethereum wallet to interact with the contract.
+- **Test Network**: Use a test network like Rinkeby, Sepolia, or a local blockchain like Ganache for testing.
 
-5. **finalizeResults()**:
-    - Calculates the total votes and uses `assert` to ensure vote counting integrity.
+## Deployment
 
-6. **resetVoting()**:
-    - Resets the vote counts and reopens voting.
-    - Uses `revert` to invalidate the transaction if voting is not yet closed.
+1. Open Remix or your preferred Ethereum development environment.
+2. Paste the Solidity code into a new file.
+3. Compile the code using Solidity compiler version `^0.8.0`.
+4. Deploy the contract to the desired Ethereum network (e.g., Remix’s JavaScript VM or a test network like Sepolia).
+5. Make a note of the deployed contract address.
 
-## Getting Started
+## Usage Instructions
 
-### Prerequisites
-- Solidity ^0.8.0
-- Remix IDE or Truffle for contract deployment
+1. **Submit Code**: Any user can submit their code for review using the `submitCode()` function.
+   ```solidity
+   submitCode("Your code content here");
+   ```
 
-### Deployment
-1. Copy the Solidity code into your IDE (e.g., Remix IDE).
-2. Compile the contract using Solidity ^0.8.0.
-3. Deploy the contract on the desired Ethereum testnet.
+2. **Review Code**: The owner reviews the submitted code using the `reviewCode()` function.
+   ```solidity
+   reviewCode(true); // Pass 'true' if the code meets requirements, 'false' otherwise.
+   ```
 
-### Interacting with the Contract
-1. **Register Candidate**: Call `registerCandidate(string _name)` to register a new candidate.
-2. **Vote**: Call `vote(string _candidateName)` to cast a vote for a registered candidate.
-3. **View Votes**: Use `getVotes(string _candidateName)` to view the vote count of a candidate.
-4. **Close Voting**: Call `closeVoting()` to close the voting process.
-5. **Finalize Results**: Use `finalizeResults()` to verify the vote counts.
-6. **Reset Voting**: Call `resetVoting()` to reset the voting system.
+3. **Check Approval Status**: Users can check whether their code submission has been approved.
+   ```solidity
+   bool isApproved = checkApproval();
+   ```
+
+## Error Handling
+
+- **`require`**: Used in `submitCode()` to ensure that the submitted code is unique.
+- **`revert`**: Used in `reviewCode()` to reject the code if it does not meet the standards.
+- **`assert`**: Used in `checkApproval()` to ensure that the code has been submitted before checking the approval status.
+
+## Example Workflow
+
+1. **User submits code**:
+   ```solidity
+   submitCode("Sample Code Version 1");
+   ```
+
+2. **Owner reviews code**:
+   ```solidity
+   reviewCode(true); // Approve the code.
+   // OR
+   reviewCode(false); // Reject the code and prompt the user to resubmit.
+   ```
+
+3. **User checks approval status**:
+   ```solidity
+   bool isApproved = checkApproval();
+   ```
 
 ## License
-This project is licensed under the MIT License.
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
 ---
-## Author
-Kaduluri Hasrhith (kaduluriharshith@gmail.com)
+
+# Harshith Kaduluri (kaduluriharshith@gmail.com)
